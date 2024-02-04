@@ -130,12 +130,13 @@ $ (X_i > t_i) $. This type of constraints is useful when we want to make choices
 according to the results of other constraints.
 
 \paragraph{Implied and redundant constraints}
-An \textit{implied constraint} is a semantically redundant and they speed up the
-solver. On the other hand, we refer to redundant constraint as a constraint
-which is semantically redundant, but it doesn't affect the solver performance.
-It happens to have a redudant constraint $r$ when we have another constraint $s$
-which makes the propagation shrink the domains of variables in the same way $r$
-would do. For example, look at this model:
+An \textit{implied constraint} is a semantically redundant constraint with the
+additional of speeding up the solver. On the other hand, we refer to
+\textit{redundant constraint} as a constraint which is semantically redundant,
+but it doesn't affect the solver performance. It happens to have a redudant
+constraint $r$ when we have another constraint $s$ which makes the propagation
+shrink the domains of variables in the same way $r$ would do. For example, look
+at this model:
 
 \begin{lstlisting}[style=none]
 include "alldifferent.mzn";
@@ -153,8 +154,8 @@ solve satisfy;
 \end{lstlisting}
 
 In this model, we are expressing the sequence puzzle problem, namely we want to
-make a sequence $x$ with length $n$, where for each $i \in {1, ..., n}$, $i$
-appears exactly $x_i$ times in the sequence $x$. Note that we don't used global
+make a sequence $x$ with length $n$, where for each $i \in {0, ..., n-1}$, $i$
+appears exactly $x_i$ times in the sequence $x$. Note that we don't use global
 constraints. The last two constraints are implied, so they affect solver
 performance. Now consider the following model:
 
@@ -181,7 +182,7 @@ effective than decomposition and so it ``discovers" all the first (ex-)implied
 constraint would do. This concept will be developed better nextly.
 
 \subsection{Symmetry}
-Often, when we try to solve a problem, tehre are many solutions which are
+Often, when we try to solve a problem, there are many solutions which are
 ``symmetric". Two solutions are symmetric if one of them is a permutation of the
 other one. The solver cannot know if two solutions are symmetric and it will
 look for all of them, but this is a waste of time because two symmetric
@@ -189,48 +190,55 @@ solutions are actually the same solution, they didn't bring something new. Thus,
 to avoid symmetry, we can add some constraints which somehow impose an order in
 order to accept just one solution and exclude all the symmetric ones. Usually,
 useful constraints are the ones of \texttt{lex*} family, namely constraints
-which pretend lexicographic order on array of variables.
-TODO
+which pretend lexicographic order on array of variables. Retake the example on
+n-queens problem, in particular the second model:
+
+\[ n \times n \; B_{ij} \in {0, 1} \]
+\[ \sum_{i \in {1, ..., n}} B_{ij} = 1, \; \forall j \in {1, ..., n} \]
+\[ \sum_{j \in {1, ..., n}} B_{ij} = 1, \; \forall i \in {1, ..., n} \]
+\[ \sum B_{ij} \leq 1 \; \textrm{on all diagonals} \]
+\[ \textrm{lex-lesser-eq}(B, \pi(B)), \; \forall \pi \]
+Here, we are using a \texttt{lex} constraint to impose an order on variables in
+order not to get other equivalent (mirrored) solutions:
+
+\includegraphics[scale=0.2]{nqueens-perm.png}
 
 \section{Constraints propagation}
 Propagation is the action of restricting the domains of variables.
 
 \subsection{Local consistency}
 This is a form of inference which detects inconsistent partial assignments. What
-is a partial assignment? An assignment is literally an assignment of a value to
-a decision variable:
+is a partial assignment? An assignment is literally a choice of a value to a
+decision variable:
 
 \[ X_i = j \]
-
 If that assignment is inconsistent, then $j$ can be removed from $D(X_i)$ and,
-as a consequence, it helps propagation.
+as a consequence, it helps propagation. Partial is referred to the fact that
+only some variables get a value in a certain moment.
 
 \subsubsection{Generalized Arc Consistency}
 A \textit{support} $(d_1, ..., d_k) \in (D(X_1), ..., D(X_k))$  for a constraint
 $C$ is an assignment of decision variables which satisfies $C$.
 A constraint $C$ is \textit{GAC} iff $\forall X_i \in {X_i, ..., X_n}$,
-$\forall v \in D(X_i)$, $v \in d_i$, where $d_i$ is a support of $C$.
+$\forall v \in D(X_i)$, $v \in d$, where $d$ is a support of $C$.
 This is called \textit{Arc consistency} ($AC$) when $k = 2$.
 
 In other words, a constraint $C$ restricts the domains $D(X_i)$. A question can
 arise: how does a constraint $C$ grant the property of $GAC$ for domains? The
 answer is that global constraints have specialized propagation algorithms. These
-algorithms tries to keep the domains of variables as restricted as possible in
-order to have always the lowest number assignments.
+algorithms tries to keep the domains of variables as restricted as possible.
 
 \subsubsection{Bounds consistency}
 It relaxes the domain of a decision variable $X_i$ to be in a range such that
 
 \[ D(X_i) = [min(X_i)...max(X_i)] \]
-
 A \textit{bound support} is a tuple $(d_1, ..., d_k) \in C$ where
-$d_i \in [min(X_i)...max(X_i)]$.
+$d_i \in [min(X_i)...max(X_i)]$. $C(X_i, ..., X_k)$ is BC iff for all $X_i \in
+{X_1, ..., X_k}$, $min(X_i)$ and $max(X_i)$ belong to a bound support. GAC is
+stronger than BC, however, it's more expensive to achieve sometimes. Look at the
+following minizinc programs to solve sudoku:
 
-$C(X_i, ..., X_k)$ is BC iff for all $X_i \in {X_1, ..., X_k}$, $min(X_i)$ and
-$max(X_i)$ belong to a bound support. GAC is stronger than BC, however, it's
-more expensive to achieve sometimes.
-
-Look at the following minizinc programs to solve sudoku:
+\pagebreak
 
 \begin{lstlisting}[style=none]
 include "globals.mzn";
@@ -289,6 +297,7 @@ solve satisfy;
 \end{lstlisting}
 
 and:
+\pagebreak
 
 \begin{lstlisting}[style=none]
 include "globals.mzn";
@@ -323,23 +332,23 @@ or even not to suggest the propagation way (the third case), the results is that
 the solver goes over five minutes with millions of failures. Clearly, this is
 just a case where domain propagation is better than bounds propagation.
 
-\subsection{Propagation}
-It is the action of achieving a certain level of consistency which is a property
-(not an action). Indeed, we talk about propagation algorithms. During search,
-multiple propagation algorithms can interact, usually in way that at a given
-momentum, only an algorithm is running and it does it until it reaches a level
-of consistency. Then, there are no other actions to do, so another algorithm
-runs. An algorithm can run multiple times, since, because of propagation, the
-decision variables domains change. What is important is that algorithms run
-until $GAC$ property is granted, if they can, however, $GAC$ is not always
-possible to be kept, sometimes only $BC$ (or other weaker consistency
+\subsection{Propagation in action}
+It is the action of achieving a certain level of consistency (which is a
+property, not an action). Indeed, we talk about propagation algorithms. During
+search, multiple propagation algorithms can interact, usually in way that at a
+given momentum, only an algorithm is running and it does it until it reaches a
+level of consistency. Then, there are no other actions to do, so another
+algorithm runs. An algorithm can run multiple times, since, because of
+propagation, the decision variables domains change. What is important is that
+algorithms run until $GAC$ property is granted, if they can, however, $GAC$ is
+not always possible to be kept, sometimes only $BC$ (or other weaker consistency
 properties) can be kept.
 
 \paragraph{Complexity}
 What about complexity of algorithms? Assume $ | D(X_i) | = d $, from definitions
 we have that one run of $C(X_1, X_2)$ takes $ O(d^2) $. However, we can improve,
-for example we can think cases where the running time is better, sometimes even
-$O(1)$.
+for example there are specialized propagation algorithms which are more
+efficient.
 
 \subsection{Global constraints}
 They are specific constraints which helps propagation and can state expressions
@@ -348,24 +357,49 @@ algorithms for these constraints keep $GAC$ in polynomial time, namely they
 simply run in polynomial time and at the end of the process, the domains are
 exactly the supports for constraints.
 
-\paragraph{Counting constraints}
-They restrict the number of variables satisfying a condition.
+\subsubsection{Counting constraints}
+These constraints count and restrict how many times certain values occur in an
+array of variables.
 
 \subsubsection{Sequencing constraints}
 They ensures a sequence of variables have certain patterns.
 
 \subsubsection{Scheduling constraints}
-They are all about assigning resources to activities.
+They are all about activities organization. For example, \texttt{cumulative} is
+about assigning resources to activities and \texttt{disjunctive} makes
+activities not overlap in time.
 
 \subsubsection{Ordering constraints}
 They obviously care of order of variables values. They include also
 lexicographic ordering constraint.
 
+\subsubsection{Table constraint}
+Sometimes, we know the exact combinations of values that variables can take.
+In those cases, table constraint can be really useful. An example can be
+crossword puzzle:
+
+\[ table([X_1, X_2, X_3], dictionary) \]
+\[ table([X_1, X_{13}, X_{16}], dictionary) \]
+\[ table([X_4, X_5, X_6, X_7], dictionary) \]
+\[ ... \]
+
+\subsubsection{Regular constraint}
+Sometimes, we need that variables follow a certain pattern. In those cases,
+deterministic finite-state automaton can be very useful, indeed,
+\textit{regular} constraint is based on dfsa: $regular([X_1, ..., X_k], A)$
+holds iff $\langle X_1, ... X_k \rangle$ forms a string accepted by $A$. This
+constraint has an efficient propagation algorithm which keeps $GAC$ property,
+however, decomposition is very efficient for this constraint as well. The
+advantage over table constraint is that the latter needs all solutions have to
+be computed firstly. Anyway, even if many constraints are just instances of
+regular, it is advisable to use specific constraints when possible, firstly for
+readability of the code; regular constraint are useful for complicated patterns.
+
+\subsection{Propagation of global constraints}
 The propagation for global constraints is developed by decomposition into
 smaller constraints for which the propagation algorithm is known. Generally,
-global constraints integrates a specialized propagation algorithm.
-
-The \texttt{alldifferent} constraint propagation algorithm is based on bipartite
+global constraints integrates a specialized propagation algorithm. For example,
+the \texttt{alldifferent} constraint propagation algorithm is based on bipartite
 graphs. One part of the graph is the variables, the other part is the possible
 values of the variables. A \textit{matching M} in a graph \textit{G} is a set of
 non-adjacent edges such that no two edges share common vertices. A
@@ -379,10 +413,9 @@ for variables. Before analyzing it, let's give some definition:
     \item an edge is \textit{matching} if it belongs in a matching;
     \item an edge is \textit{free} if it is not matching;
     \item a node is \textit{matched} if it is incident to a matching edge;
-    \item a node is \textit{free} if it is not mathed;
+    \item a node is \textit{free} if it is not matched;
     \item an edge is \textit{vital} if it belongs to every maximal matching;
 \end{itemize}
-
 Let's see the algorithm:
 
 \begin{itemize}
@@ -401,7 +434,6 @@ Let's see the algorithm:
     \end{itemize}
     \item if an edge is matching (but not vital), then keep the edge.
 \end{itemize}
-
 The problem with this algorithm is that calculating all maximal matching in a
 naive way is too expensive. Let's see these further definitions:
 
@@ -413,7 +445,6 @@ naive way is too expensive. Let's see these further definitions:
     \item An \textit{even path} or \textit{cycle} is such if the number of edges
     is even.
 \end{itemize}
-
 An important can help us to in finding maximal matchings. An edge \textit{e}
 belongs to a maximal matching iff for some arbitrary maximal matching
 \textit{M}:
@@ -424,7 +455,6 @@ belongs to a maximal matching iff for some arbitrary maximal matching
     node;
     \item or \textit{e} belongs to an even alternating cycle.
 \end{itemize}
-
 Next, we have to perform the following actions:
 
 \begin{itemize}
@@ -442,28 +472,6 @@ Next, we have to perform the following actions:
     updated.
 \end{itemize}
 
-\subsection{Table constraint}
-Sometimes, we know the exact combinations of values that variables can take.
-In those cases, table constraint can be really useful. An example can be
-crossword puzzle:
-
-\[ table([X_1, X_2, X_3], dictionary) \]
-\[ table([X_1, X_{13}, X_{16}], dictionary) \]
-\[ table([X_4, X_5, X_6, X_7], dictionary) \]
-\[ ... \]
-
-\subsection{Regular constraint}
-Sometimes, we need that variables follow a certain pattern. In those cases,
-deterministic finite-state automaton can be very useful, indeed,
-\textit{regular} constraint is based on dfsa: $regular([X_1, ..., X_k], A)$
-holds iff $\langle X_1, ... X_k \rangle$ forms a string accepted by $A$. This
-constraint has an efficient propagation algorithm which keeps $GAC$ property,
-however, decomposition is very efficient for this constraint as well. The
-advantage over table constraint is that the latter needs all solutions have to
-be computed firstly. Anyway, even if many constraints are just instances of
-regular, it is advisable to use specific constraints when possible, firstly for
-readability of the code; regular constraint are useful for complicated patterns.
-
 \section{Search}
 This phase is carried out by the constraint solver which performs a backtracking
 tree search, where nodes are variables and branches are decisions on variables.
@@ -474,8 +482,8 @@ guess a solution.
 
 \noindent\fbox{\parbox{\textwidth}{
 Remember that propagation and search are two different phases: propagation is
-concerned with domains shrinking and it's done when "evaluating" a constraint;
-search phase is done after propagation and it is concerned with the "growing"
+concerned with domains shrinking and it's done when ``evaluating" a constraint;
+search phase is done after propagation and it is concerned with the ``growing"
 of the tree. Before doing search, it's necessary to perform propagation.
 }}
 
@@ -501,7 +509,7 @@ how the search will be carried out.
 At any node, any variable can be considered. This can be more expensive than
 static heuristics, but the current state of the tree can be kept, while state
 heuristics cannot do this. There's no a best heuristics from this point of view,
-it depends from the problem.
+it depends on the problem.
 
 \paragraph{Generic dynamic variable ordering heuristics}
 There are many types of heuristics, two of them are fail-first, namely
@@ -515,7 +523,6 @@ inconsistent values with a greater probability.
     \item[Most constrained (deg)] the variable to be chosen is the one with the
     greatest number of constraints.
 \end{description}
-
 \textit{dom} and \textit{deg} are often combined to take advantages from both.
 A variation of \textit{deg} is the weighted degree heuristic, where weights are
 assigned to constraints, initially set to 1, then during propagation of a
@@ -530,7 +537,7 @@ take much more time than other instances. But this is not due to instances
 directly! Sometimes, the combination of instances and heuristics make solution
 of those instances difficult to find, but this can be solved by changing
 heuristics. Sometimes, randomization can make problems easier to solve!
-Randomization can regard to parameters of heuristics in search but also the
+Randomization can regard parameters of heuristics in search but also the
 choice of variables and even values. Restarting the search can be sometimes a
 good idea as well, performing it under certain conditions, for instance when a
 certain amount of resources have been consumed. Any kind of depth first search
@@ -542,11 +549,11 @@ when, at the restart, the search is performed differently. But how do we
 restart?
 
 \begin{description}
-    \item[constant restart], restart after using $L$ resources;
-    \item[geometric restart], restart after using $L$ resources, but setting a
+    \item[constant restart] restart after using $L$ resources;
+    \item[geometric restart] restart after using $L$ resources, but setting a
     new limit at the next restart, so we restart after $a^n*L$, where $n$ is the
     number of restarts.
-    \item[Luby restart], restart after using $s[i]*L$, where $s[i]$ is the i-th
+    \item[Luby restart] restart after using $s[i]*L$, where $s[i]$ is the i-th
     number of the Luby sequence which is a sequence of powers of 2, but before
     adding a new power in the sequence, the previous subsequence is repeated in
     the sequence, so:
@@ -577,14 +584,14 @@ if they are at the i-th level, otherwise the original heuristic is followed.
 
 The problem with LDS is that it acts on the deepest branches, but often it is
 useful to make different decisions at the highest levels because the search is
-less informative and the bad decisions are likely to be taken tehre. DDS is
+less informative and the bad decisions are likely to be taken there. DDS is
 better than LDS from this point of view.
 
 \subsection{Optimization problems}
 An optimization problem is a 4-tuple $\langle X, D, C, f \rangle$ where $X$,
 $D$ and $C$ are the decision variables, domains of variables and constraints
 respectively while $f$ is an optimization criterion in the form of an objective
-function. For example we can set the goal of a problem as the $min f$, so
+function. For example we can set the goal of a problem as the $min \; f$, so
 minimizing the value of $f$ (remember that $f$ is a variable, not a function).
 Another way to set the goal can be:
 
@@ -597,22 +604,22 @@ useful to solve a certain problem.
 
 \paragraph{Destructive lower bound}
 A possible technique to solve minimization (or maximization or stuff like those)
-can be searching ``through the domain of f", namely try assigning values to $f$
-at each iteration starting from the minimum of $D(f)$ until we reach a solution.
-At each iteration, the value is increased. Is is named ``destructive" because
-intermediate results are discarded. The solution is proved to be optimal.
-Disadvantages for this algorithm are: if resources of search are limited,
-then it's not granted that it finds a solution; it performs small steps (just
-one). An advantage is that it makes constraints tighter at each iteration, so
-propagation is helped. Another advantage is that it provides lower bounds.
+can be searching ``through the domain of $f$", namely try assigning values to $f
+$ at each iteration starting from the minimum of $D(f)$ until we reach a
+solution. At each iteration, the value is increased. It is named ``destructive"
+because intermediate results are discarded. The solution is proved to be
+optimal. Disadvantages for this algorithm are: if resources of search are
+limited, then it's not granted that it finds a solution; it performs small steps
+(just one). An advantage is that it makes constraints tighter at each iteration,
+so propagation is helped. Another advantage is that it provides lower bounds.
 
 \paragraph{Destructive upper bound}
-It is the same mechanism of DLB, but it starts with $max D(f)$. However, when we
-find a solution, it isn't proved that it is the optimal one, so we continue to
-decrease values and search solutions. When we arrive at the case where it fails
-to find the solution, then the previous iteration of the current case is proven
-to be the optimal solution. The pros and cons of this algorithm are exactly
-complementary to DLB.
+It is the same mechanism of DLB, but it starts with $max \; D(f)$. However, when
+we find a solution, it isn't proved that it is the optimal one, so we continue
+to decrease values and search solutions. When we arrive at the case where it
+fails to find the solution, then the previous iteration of the current case is
+proven to be the optimal solution. The pros and cons of this algorithm are
+exactly complementary to DLB.
 
 \paragraph{Binary search}
 The main idea is to consider upper bound and lower bound in an array (the
@@ -627,8 +634,8 @@ closer in this way:
     optimal solution.
 \end{itemize}
 It takes advantages from both DLB and DUB. But it's not the best way, because
-all information is discarded at each iteration, so we are performing duplicated
-work.
+whole information is discarded at each iteration, so we are performing
+duplicated work.
 
 \paragraph{Branch and bound}
 It uses a single search tree, incorporating bounds in the search. At each
@@ -648,7 +655,6 @@ applications. We have:
     \item a performance metric, namely something to measure the goodness
     (usually the objective variable).
 \end{itemize}
-
 In this kind of problem, usually, we have to decide when tasks have to start.
 The decision variables correspond to the operations/activities to be performed.
 An activity $a_i$ has: a starting time $s_i$, a duration $d_i$ and an ending
@@ -860,7 +866,7 @@ intensification is boosted. The update is done in order to improve the quality
 of future solutions.
 
 At the end, which one to use? Local search metaheuristics or population-based
-metaheuristics? It depends from the problem. If in the problem, moving from
+metaheuristics? It depends on the problem. If in the problem, moving from
 neighbor to neighbor is easy and cheap in terms of computational cost, then
 local search-based algorithms is good. On the other hand, if neighbourhood is
 difficult to build, the cost of moves is not so cheap and solutions can be built
