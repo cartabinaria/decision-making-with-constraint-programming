@@ -31,16 +31,16 @@ constraints, but also an optimal solution according to an objective. This
 problem is quite common in out daily lives, think about hospitals during covid:
 infected people had to be assigned to hospitals according to some parameters
 like the severity of illness, the age, the hospital resources. One can object
-that this can be with artificial intelligence, but this is very tricky, because
-for this specific problem we have no data for training and, in general, neural
-networks are very expensive to train, if we want something which have a useful
-accuracy. Decision making is typically computationally difficult (NP-hard) and
-there are many techniques to approach it: integer linear programming; boolean
-SATisfiability; constraint programming. We will focus on \textit{constraint
-programming} (CP). But what is constraint programming? It is a declarative
-programming paradigm for expressing and solving combinatorial optimization
-problems. These problems have to be expressed as a model which has typically
-three entities:
+that this can be done with artificial intelligence, but this is very tricky,
+because for this specific problem we have no data for training and, in general,
+neural networks are very expensive to train, if we want something which have a
+useful accuracy. Decision making is typically computationally difficult
+(NP-hard) and there are many techniques to approach it: integer linear
+programming; boolean SATisfiability; constraint programming. We will focus on
+\textit{constraint programming} (CP). But what is constraint programming? It is
+a declarative programming paradigm for expressing and solving combinatorial
+optimization problems. These problems have to be expressed as a model which has
+typically three entities:
 \begin{itemize}
     \item the unknowns, namely decision variables which we have to find a value
     for;
@@ -60,6 +60,8 @@ decision variables in order to avoid incompatible values in the future (this is
 called \textit{propagation}). But these phases are separated, indeed, it
 interleaves cycles of variables assigning and propagation. Modelling is
 critical, since the solver depends on it.
+
+\pagebreak
 
 \section{Model}
 Now, we can formalize the concepts
@@ -93,7 +95,33 @@ Channeling constraints makes two different models ``comunicate", in the sense
 that, given two models $m1$ and $m2$ and a channeling constraint $c$, $c$ brings
 what has been discovered in $m1$ in $m2$ and viceversa thanks to different
 propagation algorithms in different models $m1$ and $m2$. This improves
-propagation because benefits from a model are brought to another model.
+propagation because benefits from a model are brought to another model. Think
+about n-queens problem where we have to place $n$ queens in a $n \times n$
+chests board in order to they cannot eat directly any queen. We can have
+different models for this problem.
+
+First model:
+\[ X_1, ..., X_n \in {1, ..., n} \]
+\[ \textrm{alldifferent}([X_1, ..., X_n]) \]
+\[ \textrm{alldifferent}([X_1 + 1, ..., X_n + n]) \]
+\[ \textrm{alldifferent}([X_1 - 1, ..., X_n - n]) \]
+
+\pagebreak
+
+Second model:
+\[ n \times n \; B_{ij} \in {0, 1} \]
+\[ \sum_{i \in {1, ..., n}} B_{ij} = 1, \; \forall j \in {1, ..., n} \]
+\[ \sum_{j \in {1, ..., n}} B_{ij} = 1, \; \forall i \in {1, ..., n} \]
+\[ \sum B_{ij} \leq 1 \; \textrm{on all diagonals} \]
+\[ \textrm{lex-lesser-eq}(B, \pi(B)), \; \forall \pi \]
+The two models represent the same problem. The first one uses variables to
+represent queens positions on the board and it exploits the alldifferent
+constraint, while the second one uses a boolean matrix to represent the
+positions and it exploits the lexicographic order constraint. They have
+different benefits on search (not explained which benefits there, take this as
+granted), so how to take advantage from both? We use a channeling constraint:
+
+\[ \forall i, j \; X_i = j \iff B_{ij} = 1 \]
 
 \paragraph{Meta-constraints}
 A \textit{meta-constraint} is a constraint occurring in another constraint. For
