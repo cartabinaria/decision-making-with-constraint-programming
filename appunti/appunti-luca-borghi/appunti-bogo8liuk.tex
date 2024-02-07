@@ -639,10 +639,39 @@ duplicated work.
 
 \paragraph{Branch and bound}
 It uses a single search tree, incorporating bounds in the search. At each
-iteration, when a solution is found, a new bound constraint is set to ensure the
-future solutions are better, then it backtracks and looks for a new solution.
-This is repeated until the problem is infeasible, at that point, the last
-solution is demonstrated to be optimal.
+iteration, when a solution is found, a new bounding constraint is set to ensure
+the future solutions are better, then it backtracks and looks for a new
+solution. This is repeated until the problem is infeasible, at that point, the
+last solution is demonstrated to be optimal. We can see an example of this in
+map colouring problem:
+
+\frame{\includegraphics[scale=0.15]{mapcol1.png}}
+\frame{\includegraphics[scale=0.15]{mapcol2.png}}
+
+\frame{\includegraphics[scale=0.15]{mapcol3.png}}
+\frame{\includegraphics[scale=0.15]{mapcol4.png}}
+
+We found a solution, namely 4, which is not prooved to optimal, so we set a
+bounding constraint which pretends the actual objective variable is lower than
+the our last solution (lower because the actual objective variable has to be
+minimized):
+
+\pagebreak
+
+\frame{\includegraphics[scale=0.11]{mapcol5.png}}
+\frame{\includegraphics[scale=0.11]{mapcol6.png}}
+\frame{\includegraphics[scale=0.11]{mapcol7.png}}
+
+\frame{\includegraphics[scale=0.11]{mapcol8.png}}
+\frame{\includegraphics[scale=0.11]{mapcol9.png}}
+\frame{\includegraphics[scale=0.11]{mapcol10.png}}
+
+\frame{\includegraphics[scale=0.11]{mapcol11.png}}
+\frame{\includegraphics[scale=0.11]{mapcol12.png}}
+\frame{\includegraphics[scale=0.11]{mapcol13.png}}
+
+We found another solution, namely 3; at this point we would set another bounding
+constraint and we repeat the previous steps. TODO: pros and cons
 
 \section{Scheduling}
 It concerns with ordering resources and/or tasks over time and it has a lot of
