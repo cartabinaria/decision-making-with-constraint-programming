@@ -608,10 +608,10 @@ can be searching ``through the domain of $f$", namely try assigning values to $f
 $ at each iteration starting from the minimum of $D(f)$ until we reach a
 solution. At each iteration, the value is increased. It is named ``destructive"
 because intermediate results are discarded. The solution is proved to be
-optimal. Disadvantages for this algorithm are: if resources of search are
-limited, then it's not granted that it finds a solution; it performs small steps
-(just one). An advantage is that it makes constraints tighter at each iteration,
-so propagation is helped. Another advantage is that it provides lower bounds.
+optimal. Disadvantages for this algorithm are: it's not an anytime algorithm and
+it performs small steps (just one). An advantage is that it makes constraints
+tighter at each iteration, so propagation is helped. Another advantage is that
+it provides lower bounds.
 
 \paragraph{Destructive upper bound}
 It is the same mechanism of DLB, but it starts with $max \; D(f)$. However, when
@@ -619,7 +619,8 @@ we find a solution, it isn't proved that it is the optimal one, so we continue
 to decrease values and search solutions. When we arrive at the case where it
 fails to find the solution, then the previous iteration of the current case is
 proven to be the optimal solution. The pros and cons of this algorithm are
-exactly complementary to DLB.
+exactly complementary to DLB, namely it provides an anytime algorithm and steps
+are large, but it doesn't help propagation and it doesn't provide lower bounds.
 
 \paragraph{Binary search}
 The main idea is to consider upper bound and lower bound in an array (the
@@ -629,7 +630,8 @@ closer in this way:
     \item we set $lb < f < (lb + ub / 2)$, where $lb$ is lower bound and $ub$ is
     upper bound;
     \item we try to solve the problem for that value of $f$;
-    \item if the problem is feasible, then we update $ub$, else we update $lb$;
+    \item if the problem is feasible, then we update $ub$, else we update $lb$,
+    in order they take the previous value of $f$;
     \item we repeat these procedures until we reach $f = lb + 1$, which is the
     optimal solution.
 \end{itemize}
@@ -650,8 +652,7 @@ map colouring problem:
 
 \frame{\includegraphics[scale=0.15]{mapcol3.png}}
 \frame{\includegraphics[scale=0.15]{mapcol4.png}}
-
-We found a solution, namely 4, which is not prooved to optimal, so we set a
+We found a solution, namely 4, which is not prooved to be optimal, so we set a
 bounding constraint which pretends the actual objective variable is lower than
 the our last solution (lower because the actual objective variable has to be
 minimized):
@@ -669,13 +670,14 @@ minimized):
 \frame{\includegraphics[scale=0.11]{mapcol11.png}}
 \frame{\includegraphics[scale=0.11]{mapcol12.png}}
 \frame{\includegraphics[scale=0.11]{mapcol13.png}}
-
 We found another solution, namely 3; at this point we would set another bounding
-constraint and we repeat the previous steps. TODO: pros and cons
+constraint and we repeat the previous steps. The advantages of this approach is
+that it is an anytime algorithm and there is no waste of information from
+iteration to iteration. The cons are about not providing lower bounds.
 
 \section{Scheduling}
 It concerns with ordering resources and/or tasks over time and it has a lot of
-applications. We have:
+applications. In a typical scheduling problem, we have:
 \begin{itemize}
     \item a set of resources with fixed capacities;
     \item a set of tasks with durations and resource requirements;
@@ -692,13 +694,13 @@ start time as $LST_i$, to the earliest end time as $EET_i$ and to latest end
 time $LET_i$. Note that $EST_i$, $EET_i$, $LST_i$ and $LET_i$ (the latter called
 deadline) correspond to the possible earliest or latest times (not necessarily
 the real ones). There are two types of activity:
-\begin{itemize}
-    \item preemptive activities, which can be interrupted any time, and it holds
-    $s_i + d_i \leq e_i $
-    \item non-preemtpive activities, which cannot be interrupted by external
+\begin{description}
+    \item[preemptive] activities, which can be interrupted any time, thus it
+    must holds that $s_i + d_i \leq e_i $
+    \item[non-preemtpive] activities, which cannot be interrupted by external
     agents and it holds $s_i + d_i = e_i $.
-\end{itemize}
-
+\end{description}
+\pagebreak
 A resource is something available and limited for tasks to run. We have:
 \begin{description}
     \item[cumulative/parallel] resources which allow multiple activities to run
@@ -711,6 +713,8 @@ A resource is something available and limited for tasks to run. We have:
     execute only one at a time regardless the resource capacity. The disjunctive
     constraint handles this type of resources.
 \end{description}
+Nextly, we'll see an example of scheduling problem at this
+\hyperlink{rcpsp}{section}.
 
 \subsubsection{Temporal constraints}
 Temporal constraints can model the fact some actvities must come before or after
@@ -728,11 +732,13 @@ a dummy activity with duration 0 and that must run as the last activity or
 taking the maximum of the starting times of activities plus their durations
 (obtaining the ending times).
 
-\subsection{RCPSP}
+\hypertarget{rcpsp}{\subsection{RCPSP}}
 Take a look at a sample for RCPSP:
 \begin{itemize}
     \item a project graph $\langle A, E \rangle$, where $A$ is the set of
-    activities and $E$ are their ending time;
+    activities and $E$ are their ending time. The graph denotes the precedence
+    of activities, indeed, we usually choose one or more starting nodes $a_0,
+    ..., a_k$ and one or more ending nodes $a_r, ..., a_n$;
     \item a set $R$ of resource $r_k$ with a capacity $c_k$;
     \item each activity $a_i$ has a duration $d_i$ and a resource requirement
     $r_{ik}$
@@ -757,18 +763,18 @@ to do backtracking. How to backtrack? Given a non-optimal solution, we select an
 activity $a_i$ and instead of choosing the value for that variable, we postpone
 it and we visit a subtree. Doing this procedure will grant optimality, but it's
 often very expensive in terms of time. This technique regards both value and
-variable choices.
-
-And what about variable selection? Precedence constraints help us because they
-make variables domains shrink. A good greedy choice can be selecting the task
-with the minimum $LET_i$, so the one with the first deadline in order to discard
-it immediately and to have the lowest probability for it to get a blind spot. To
-reach optimality, refer to the technique explained before.
+variable choices. And what about variable selection? Precedence constraints help
+us because they make variables domains shrink. A good greedy choice can be
+selecting the task with the minimum $LET_i$, so the one with the first deadline
+in order to discard it immediately and to have the lowest probability for it to
+get a blind spot (``fail first" policy). To reach optimality, refer to the
+technique explained before.
 
 \section{Heuristic search}
-We have two types of methods: complete methods, which guarantee the optimal
-solution to each finite-size instance of a problem in a finite time; approximate
-methods, which don't guarantee neither optimality, nor termination in case of
+We have two types of methods to solve a combinatorial optimization problem:
+\textit{complete methods}, which guarantee the optimal solution to each
+finite-size instance of a problem in a finite time; \textit{approximate
+methods}, which don't guarantee neither optimality, nor termination in case of
 infeasibility, but they can find better solutions than complete methods in a
 lower amount of time. We have three types approximate methods: constructive
 heuristics, local search, metaheuristics.
@@ -777,8 +783,17 @@ heuristics, local search, metaheuristics.
 This is the fastest approximation and it consists in constructing the solution
 from scratch by repeatedly extending the current partial assignment until a
 solution is found or the stopping conditions are satisfied. An example can be
-the greedy heuristics, but they don't guarantee optimality, but even though
-this, they are quick and they are used as initialization step for other methods.
+the greedy heuristics, which don't guarantee optimality, but even though this,
+they are quick and they are used as initialization step for other methods. For
+instance, in Travelling Salesman problem a greedy approach can be visiting the
+unvisited city nearest (in terms of cost) to the current one:
+
+\includegraphics[scale=0.2]{tsp.png}
+
+A greedy heuristic for this case, starting from point $A$ can give the following
+result: $A-D-B-C-A$. But this is not optimal! Indeed, the final distance is $1+1
++7+3=12$, we can find a better solution: $A-C-D-B-A$ whose final distance is
+$3+2+1+4=10$.
 
 \subsection{Local search}
 It gives often better solutions than constructive heuristics in terms of
@@ -800,18 +815,19 @@ is done like this:
     \item while $\exists s' \in N(s). \; f(s') \leq f(s)$, assign to $s$ an
     improving neighbor.
 \end{itemize}
-This algorithm stops when it finds a local minimum. There are different choices
-of the neighbor: the first one or the best one. The first solution can be
-generated randomly or heuristically. But how to define neighbourhood structure?
-It comes useful the notion \textit{K-exchange neighbourhood}, where $K$ is the
-number of modifications to do on the graph. In the problem of travelling
-salesman problem, we can have that a starting solution is a hamiltonian tour
-of the graph, then if we choose 2-exchange, we have to switch two archs, if
-we choose 3-exchange, we have to switch three archs, etc.. Clearly, the more $K$
-grows, the more neighbourhoods grows exponentially. Generally, a key issue is
-how to define the neighbourhood. Too small neighbourhood is fast to find, but
-the quality of local minima is low, while too large neighbourhood improves the
-quality of local minima, but they are expensive to calculate.
+This algorithm stops when it finds a local minimum. There are two possible
+choices for the neighbor: the first one or the best one. The first solution can
+be generated randomly or heuristically. But how to define neighbourhood
+structure? It comes useful the notion of \textit{K-exchange neighbourhood},
+where $K$ is the number of modifications to do on the graph. In the travelling
+salesman problem, we can have that a starting solution is a hamiltonian cycle of
+the graph (a cycle where each node of a graph is visited exactly once), then if
+we choose 2-exchange, we have to switch two archs, if we choose 3-exchange, we
+have to switch three archs, etc.. Clearly, the more $K$ grows, the more
+neighbourhoods grows exponentially. Generally, a key issue is how to define the
+neighbourhood. Too small neighbourhood is fast to find, but the quality of local
+minima is low, while too large neighbourhood improves the quality of local
+minima, but they are expensive to calculate.
 
 \subsection{Metaheuristics}
 They consist in higher level strategies which ``guide" heuristics to find a
@@ -826,8 +842,8 @@ It is similar to local search, but differently to it, this method tries to
 escape to local minimum and it does it by allowing worsening solutions, by
 changing neighbourhood structure during search or by changing objective function
 during search. Clearly, we have to interrupt the algorithm at a certain point
-since it cannot stop; some criteria are setting a maximum CPU time, number of
-iterations, etc.. Here some methods.
+since it cannot stop; some criteria can be: setting a maximum CPU time, limiting
+the number of iterations, etc.. Here some methods.
 
 \paragraph{Simulated annealing}
 Like local search, but it accepts worsening moves with a certain probability.
@@ -837,6 +853,8 @@ diversification.
 \paragraph{Variable neighbourhood search}
 It changes neighbourhood structure during search, more precisely this happens
 whenever a new local optima is reached.
+
+\includegraphics[scale=0.2]{var-neigh-search.png}
 
 \paragraph{Tabu search}
 It keeps track of a ``tabu list" of solutions or moves and it forbids them. So
@@ -854,71 +872,78 @@ of the claimed solution! The idea is to penalize some solution characteristics
 which occur frequently, so the result is that some solutions get worse than how
 they are really.
 
+\includegraphics[scale=0.1]{guided-local-search1.png}
+\includegraphics[scale=0.1]{guided-local-search2.png}
+\includegraphics[scale=0.1]{guided-local-search3.png}
+
+\includegraphics[scale=0.1]{guided-local-search4.png}
+\includegraphics[scale=0.1]{guided-local-search5.png}
+
 \subsubsection{Population-based methods}
 We work on a set of solutions and the basic principle is to find common
 characteristics among solutions. We have a probabilistic model from which we
 obtain sample solutions to analyse. After this analysis, we update our model and
 we restart the process. This process is similar to what ants do when they come
-across an obstacle: the ants will try to find a path to escape from the
-obstacle, then they will start to take the shortest path because it will be the
-one which is walked by the majority of ants and the ants drop pheromones when
-they walk and follow paths where the concentration of pheromones is higher. From
+across an obstacle: the divided groups of ants will try to find a path to escape
+from the obstacle, in order to gather with other groups; ants follow the paths
+with the highest concentration of pheromones which are dropped always by ants,
+so they will automatically gather with other ants by taking the shortest path,
+because it is the one which is nearest to the pheromones of other ants. From
 this phenomenon, we have the so-called \textit{pheromone model}: we have a set
 of \textit{pheromone values} which act as the memory with the goal to focus the
 search on certain paths. A way to make this concept formal can be: a
-\textit{pheromone value} is a value $t(X_i, v_i)$, $\forall X_i \in X$ and
-$v_i \in D(X_i)$ which represents the desirability of assigning $v_i$ to $X_i$.
-A common usage is to have bounding for pheromone values $t_{min}$ and $t_{max}$
-and to set initially values to $t_{max}$. As a consequence, we have that
-decreasing values augment diversification because, we will have different values
-from what we have had before (so it's like ants forget older solutions to get
-close to newer solutions), while increasing will help intensification.
-
-In order to begin, we use ``artificial ants". They simply consist in using
-constructive heuristics for an initial solution. So the algorithm has the
-following schema:
+\textit{pheromone value} is a value $\tau(X_i, v_i)$, $\forall X_i \in X$ and
+$v_i \in D(X_i)$, and this value represents the desirability of assigning $v_i$
+to $X_i$. A common usage is to have bounding for pheromone values $\tau_{min}$
+and $\tau_{max}$ and to set initially values to $\tau_{max}$. As a consequence,
+we have that decreasing values augments diversification because, we will have
+different values from what we have had before (so it's like ants forget older
+solutions to get close to newer solutions), while increasing will help
+intensification. In order to begin, we use ``artificial ants". They simply
+consist in using constructive heuristics for an initial solution. So the
+algorithm has the following schema:
 \begin{itemize}
     \item start from an initial solution, using constructive heuristics;
     \item iteratively choose a variable $X_i$ according to some heuristic (this
     is parametric) and then choose the value $v_i \in D(X_i)$ according to the
     probability:
 
-    \includegraphics[scale=0.2]{prob_ants.png}    
+\includegraphics[scale=0.2]{prob_ants.png}    
 
     where $\alpha$ and $\beta$ are parameters used to balance the pheromone and
     heuristic factors.
 \end{itemize}
-Pheromone values in the $i$-th round are the ones which comes from $(i-1)$-th
-round solutions. Then, at each round, pheromone values are updated. If they are
-decreased, diversification is boosted, else if they are increased, then
-intensification is boosted. The update is done in order to improve the quality
-of future solutions.
+Pheromone values in the $i$-th round are the ones which comes from the previous
+round (namely $(i-1)$-th round) solutions. Then, at each round, pheromone values
+are updated. If they are decreased, diversification is boosted, else if they are
+increased, then intensification is boosted. The update is done in order to
+improve the quality of future solutions. At the end, which one to use? Local
+search metaheuristics or population-based metaheuristics? It depends on the
+problem. If in the problem, moving from neighbor to neighbor is easy and cheap
+in terms of computational cost, then local search-based algorithms is good. On
+the other hand, if neighbourhood is difficult to build, the cost of moves is not
+so cheap and solutions can be built as composition of blocks, then
+population-based methods is a good idea. Generally, local-based methods boost
+intensification because we act on subsets of all solutions, while
+population-based methdos have the ability to boost diversification (always
+according to how the pheromones are updated). Hybrid methods tries to get the
+best from both methods types. Metaheuristics is effective in finding first
+good-quality solutions, but it struggles with complex constraints. For this
+reason, mixing metaheuristics and complete methods in different ways can improve
+the quality of solutions in a time unit, since complete methods, on the other
+hand, can be bad and inefficient if we have loose bounds of objective function.
+For example, a complete method can apply a metaheuristic to improve a solution
+or, on the contrary, metaheuristics use a complete methods to efficiently to
+explore neighbourhood.
 
-At the end, which one to use? Local search metaheuristics or population-based
-metaheuristics? It depends on the problem. If in the problem, moving from
-neighbor to neighbor is easy and cheap in terms of computational cost, then
-local search-based algorithms is good. On the other hand, if neighbourhood is
-difficult to build, the cost of moves is not so cheap and solutions can be built
-as composition of blocks, then population-based methods is a good idea.
-Generally, local-based methods boost intensification because we act on subsets
-of all solutions, while population-based methdos have the ability to boost
-diversification (always according to how the pheromones are updated). Hybrid
-methods tries to get the best from both methods types.
-
-Metaheuristics is effective in finding first good-quality solutions, but it
-struggles with complex constraints. For this reason, mixing metaheuristics and
-complete methods in different ways can improve the quality of solutions in a
-time unit, since complete methods, on the other hand, can be bad and inefficient
-if we have loose bounds of objective function. For example, a complete method
-can apply a metaheuristic to improve a solution or, on the contrary,
-metaheuristics use a complete methods to efficiently to explore neighbourhood.
+\pagebreak
 
 \paragraph{Large neighbourhood search}
 And local search? How can it be combined with complete methods? Remember the
 issue about small and large neighbourhoods; from this point, we can use large
 neighbourhood and explore it with a complete method. We can see exploration of
 neighbourhood as the solution of a sub-problem. So, given a solution $s$, we
-have to possible moves to apply to each variable:
+have two possible moves to apply to each variable:
 \begin{itemize}
     \item fix part of the variables value;
     \item relax the remaining variables.
@@ -928,9 +953,7 @@ have to possible moves to apply to each variable:
 The good fact about this neighbourhood structure is that it works with all
 problems. Now, two issues are: which percentage of variables to fix? Which
 variables to fix? There are many ways to follow and it can depend from the
-problem.
-
-Generally, after wee saw all these different methods, the important thing is to
+problem. Generally, after wee saw all these different methods, the important thing is to
 know how to mix these methods; to fix an optimization problem, the general good
 way is to use a hybrid method.
 
