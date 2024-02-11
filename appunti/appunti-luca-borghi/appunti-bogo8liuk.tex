@@ -401,8 +401,8 @@ smaller constraints for which the propagation algorithm is known. Generally,
 global constraints integrates a specialized propagation algorithm. For example,
 the \texttt{alldifferent} constraint propagation algorithm is based on bipartite
 graphs. One part of the graph is the variables, the other part is the possible
-values of the variables. A \textit{matching M} in a graph \textit{G} is a set of
-non-adjacent edges such that no two edges share common vertices. A
+values of the variables. A \textit{matching M} in an undirected graph \textit{G}
+is a set of edges such that no two edges share common vertices. A
 \textit{maximal matching} for a graph \textit{G} is a matching which is not
 subset of any other matching in \textit{G}. The propagation algorithm for
 \texttt{alldifferent} constraint considers edges as the assignments of variables
@@ -434,7 +434,7 @@ Let's see the algorithm:
     \end{itemize}
     \item if an edge is matching (but not vital), then keep the edge.
 \end{itemize}
-The problem with this algorithm is that calculating all maximal matching in a
+The problem with this algorithm is that calculating all maximal matchings in a
 naive way is too expensive. Let's see these further definitions:
 
 \begin{itemize}
@@ -445,8 +445,8 @@ naive way is too expensive. Let's see these further definitions:
     \item An \textit{even path} or \textit{cycle} is such if the number of edges
     is even.
 \end{itemize}
-An important can help us to in finding maximal matchings. An edge \textit{e}
-belongs to a maximal matching iff for some arbitrary maximal matching
+An important theorem can help us in finding maximal matchings. An edge
+\textit{e} belongs to a maximal matching iff for some arbitrary maximal matching
 \textit{M}:
 
 \begin{itemize}
@@ -455,13 +455,13 @@ belongs to a maximal matching iff for some arbitrary maximal matching
     node;
     \item or \textit{e} belongs to an even alternating cycle.
 \end{itemize}
-Next, we have to perform the following actions:
+Thus, we have to perform the following actions:
 
 \begin{itemize}
     \item we choose an arbitrary maximal matching \textit{M};
-    \item all free edges in \textit{M} changes their direction in order to they
+    \item all free edges in \textit{M} change their direction in order to they
     go from values to variables;
-    \item all matching edges in \textit{M} changes their direction in order to
+    \item all matching edges in \textit{M} change their direction in order to
     they go from variables to values;
     \item starting from a free node, search for all nodes on directed simple
     path and mark all the edges;
@@ -602,7 +602,7 @@ Another way to set the goal can be:
 In this way, we are searching the minimum number of $f$ value such that it is
 useful to solve a certain problem.
 
-\paragraph{Destructive lower bound}
+\subsubsection{Destructive lower bound}
 A possible technique to solve minimization (or maximization or stuff like those)
 can be searching ``through the domain of $f$", namely try assigning values to $f
 $ at each iteration starting from the minimum of $D(f)$ until we reach a
@@ -613,7 +613,7 @@ it performs small steps (just one). An advantage is that it makes constraints
 tighter at each iteration, so propagation is helped. Another advantage is that
 it provides lower bounds.
 
-\paragraph{Destructive upper bound}
+\subsubsection{Destructive upper bound}
 It is the same mechanism of DLB, but it starts with $max \; D(f)$. However, when
 we find a solution, it isn't proved that it is the optimal one, so we continue
 to decrease values and search solutions. When we arrive at the case where it
@@ -622,7 +622,7 @@ proven to be the optimal solution. The pros and cons of this algorithm are
 exactly complementary to DLB, namely it provides an anytime algorithm and steps
 are large, but it doesn't help propagation and it doesn't provide lower bounds.
 
-\paragraph{Binary search}
+\subsubsection{Binary search}
 The main idea is to consider upper bound and lower bound in an array (the
 solutions domain). At each iteration, these bounds are restricted and come
 closer in this way:
@@ -639,7 +639,7 @@ It takes advantages from both DLB and DUB. But it's not the best way, because
 whole information is discarded at each iteration, so we are performing
 duplicated work.
 
-\paragraph{Branch and bound}
+\subsubsection{Branch and bound}
 It uses a single search tree, incorporating bounds in the search. At each
 iteration, when a solution is found, a new bounding constraint is set to ensure
 the future solutions are better, then it backtracks and looks for a new
