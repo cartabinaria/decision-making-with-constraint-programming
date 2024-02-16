@@ -389,7 +389,7 @@ We try to solve it with $n = 7$, so we are solving a sudoku 49X49. In the
 first program, we specify (or better, we suggest) to use domain propagation,
 namely we keep $GAC$. Results are these:
 
-\includegraphics[scale=0.2]{sudoku_res.png}
+\includegraphics[scale=0.2]{sudoku-res.png}
 
 Just 3 seconds, not bad! But when we try to use bounds propagation (namely $BC$)
 or even not to suggest the propagation way (the third case), the results is that
@@ -972,7 +972,7 @@ algorithm has the following schema:
     is parametric) and then choose the value $v_i \in D(X_i)$ according to the
     probability:
 
-\includegraphics[scale=0.2]{prob_ants.png}    
+\includegraphics[scale=0.2]{prob-ants.png}    
 
     where $\alpha$ and $\beta$ are parameters used to balance the pheromone and
     heuristic factors.
@@ -1012,7 +1012,7 @@ have two possible moves to apply to each variable:
     \item fix part of the variables value;
     \item relax the remaining variables.
 \end{itemize}
-\includegraphics[scale=0.25]{fix_relax.png}
+\includegraphics[scale=0.25]{fix-relax.png}
 
 The good fact about this neighbourhood structure is that it works with all
 problems. Now, two issues are: which percentage of variables to fix? Which
