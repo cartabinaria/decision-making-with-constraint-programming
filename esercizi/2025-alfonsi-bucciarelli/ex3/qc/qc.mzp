@@ -1,0 +1,23 @@
+{
+    "openFiles": [
+        "qc.mzn",
+        "qc30-03.dzn",
+        "qc30-05.dzn",
+        "qc30-08.dzn",
+        "qc30-12.dzn",
+        "qc30-19.dzn"
+    ],
+    "openTab": 0,
+    "projectFiles": [
+        "../nqueens",
+        "qc.mzn",
+        "qc30-03.dzn",
+        "qc30-05.dzn",
+        "qc30-08.dzn",
+        "qc30-12.dzn",
+        "qc30-19.dzn"
+    ],
+    "selectedBuiltinConfigId": "org.gecode.gecode",
+    "selectedBuiltinConfigVersion": "6.3.0",
+    "version": 106
+}
