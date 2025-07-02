@@ -1,0 +1,13 @@
+{
+    "openFiles": [
+        "nqueens.mzn"
+    ],
+    "openTab": 0,
+    "projectFiles": [
+        "nqueens.mzn",
+        "../poster_placement/posters_placement.mzn"
+    ],
+    "selectedBuiltinConfigId": "org.gecode.gecode",
+    "selectedBuiltinConfigVersion": "6.3.0",
+    "version": 106
+}

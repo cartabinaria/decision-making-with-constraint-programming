@@ -1,0 +1,90 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\title{Exercices of Decision Making with Constraint Programming\\  Exercise 1}
+\author{Andrea Alfonsi, Stefano Bucciarelli}
+
+
+\begin{document}
+\maketitle
+
+\section{N-Queens}
+
+
+\begin{tabular}{||c c c c c c c||} 
+ \hline
+ n & sols & r & rc1 & rc2 & rc3 & alldiff \\ 
+ \hline\hline
+ 8 &	92 & 1,016 & 637 & 598 & 864 & 254 \\ 
+ \hline
+ 9 & 352 & 4,700	& 2,829	& 2,778	& 5,220 & 850 \\
+ \hline
+ 10 & 724 & 23,393 & 13,749 & 13,594 & 22,554 & 3,640 \\
+ \hline
+ 12 & 14,20 & 772,912 & 347,604 & 380,726 & 820,519	& 76,862 \\
+ \hline
+\end{tabular}
+\newline
+\newline
+
+\begin{tabular}{||c c c ||} 
+ \hline
+ n & sols & alldiffsym \\ 
+ \hline\hline
+ 8 & 12 & 87 \\ 
+ \hline
+ 9 & 46 & 269 \\ 
+ \hline
+ 10 & 92 & 906 \\ 
+ \hline
+ 12 & 1,787  & 16,610 \\ 
+ \hline
+\end{tabular}
+\newline
+\newline
+
+\begin{enumerate}
+  \item What is happening when going r → rc1 → alldiff ? Why? \\ \\
+  When going from the row model (r) to the row combine model (rc1) and then to the all different model (alldiff), we are essentially transforming the representation of the same problem, using different models. If we look in detail we can see that when going from (r) to (rc) we are introducing new variables combining the row model with column model. Their combination strengthens constraint propagation through channeling constraints, which enforce consistency between row and column variables. This approach significantly reduces the number of failed attempts compared to model r.
+  Model "alldiff" utilizes the "alldifferent" global constraint. As a global constraint, it incorporates specialized propagation algorithms that leverage the problem's underlying structure, resulting in more powerful inferences than basic propagation. In this context, "alldifferent" restricts the frequency of value assignments, leading to enhanced propagation strength compared to models r and rc1, which do not utilize this constraint
+
+
+
+
+
+  
+  \item What is happening when going rc1 → rc2 → rc3 ? Why? \\ \\
+      We eliminate several semantically redundant constraints, each implied by the inverse mapping between rows and columns, defined as:
+
+    $$\forall i, j: X_i = j \iff Y_j = i  \quad\quad (C1) $$
+
+    Specifically:
+    \begin{itemize}
+8        \item $alldifferent([X_, ..., X_n])$: This constraint is redundant. C1 establishes a one-to-one correspondence between the indices of X and Y. Consequently, if any value were to repeat within X, it would necessitate two distinct values in Y mapping to the same index in X, which is a contradiction. Therefore, C1 inherently enforces the distinctness of values within X.
+        \item $alldifferent([Y_, ..., Y_n])$: This is also redundant for analogous reasons. C1's bijective mapping ensures distinctness in Y, mirroring the logic applied to X.
+        \item $\forall i < j: |Y_i - Y_j| \neq |i - j|$: This constraint, preventing diagonal attacks on Y, is implicitly enforced by C1. Given the analogous constraint on X: $ \forall i < j: |X_i - X_j| \neq |i - j|$, C1's symmetric relationship dictates that Y must adhere to the same condition. If X cannot form diagonal attacks, then due to the inversion imposed by C1, Y likewise cannot form diagonal attacks. The impossibility of diagonal attacks in either board implies their impossibility in both.
+    \end{itemize}
+    These removed constraints do not alter the solution set. However, they reduce the search space explored by the solver. A larger search space leads to a higher probability of encountering failures during the search process, which is the expected outcome
+
+  \item What is happening when going alldiff → alldiffsym? Why? \\ \\
+  The transition from alldiff to alldiffsym is a refinement that takes advantage of the specific structure of the problem to improve the solver's performance. The second model is more efficient than the first one because it leverages the symmetry present in the problem to reduce the search space. By exploiting this symmetry, alldiffsym can prune branches of the search tree that would otherwise be explored, as we can notice comparing the number of failures of both models.
+\end{enumerate}
+
+\section{A Sequence Puzzle}
+
+\begin{tabular}{||c c c c c||} 
+ \hline
+ n & Base (Fails) & Base (Time) & Base + Impl (Fails) & Base + Impl (Time) \\ 
+ \hline\hline
+ 500	& 652 & 22s 434ms & 498 & 14s 305ms \\
+ \hline
+ 1,000 & 1,362 & 2m 26s & 995 & 1m 0s \\
+ \hline
+\end{tabular}
+
+\begin{enumerate}
+\item What is happening when going base → base+implied ? Why? \\ \\
+By incorporating implied constraints into the base model, we provide the solver with additional, logically deducible information about the problem. These constraints, while not explicitly stated, are inherently implied by the existing constraints and variables. When the solver recognizes these implicit relationships, it can proactively eliminate a larger portion of the search space. This is because the solver can identify and discard solutions that violate these implied constraints early on in the search process. Consequently, the solver is left with a smaller, more focused search space to explore, leading to a substantial reduction in the time required to find a solution.
+\end{enumerate}
+
+\end{document}

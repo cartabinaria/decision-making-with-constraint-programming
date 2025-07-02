@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[margin=3cm]{geometry}
+
+\title{Exercices of Decision Making with Constraint Programming\\  Exercise 3}
+\author{Andrea Alfonsi, Stefano Bucciarelli}
+
+
+\begin{document}
+    \maketitle
+    \section{NQueens}
+    \begin{tabular}{||c | c | c | c | c | c |  c||} 
+    \hline
+      n & \multicolumn{2}{c|}{input order} & \multicolumn{2}{c|}{min domain size} &  \multicolumn{2}{c||}{domWdeg} \\  \hline
+      & min value & random value & min value & random value & min value & random value  \\  \hline
+      30 & 1,626,587 & 9 & 15 & \textbf{1} & 15 & \textbf{1}  \\  \hline
+      35 & 2,887,825 & 10 & 22 & \textbf{0} & 22 & \textbf{0}  \\  \hline
+      45 & - & 6 & 6 & \textbf{1} & 6 & \textbf{1} \\  \hline
+      50 & - & 42 & 124 & \textbf{10} & 124 & \textbf{10}  \\  \hline
+    \end{tabular}
+    \\ \\
+    \begin{enumerate}
+    \item For a given variable ordering, how does random value choice change the performance? \\ \\
+    The table shows that randomness improves performance compared to min value search, which is pretty awful. The left subtrees in the min value search tree correspond to placements of the queen in initial rows, but in N Queens solutions, there are always queens that are placed in final rows. These placements are found after exploring many left subtrees. For example, if there are queens in the initial columns (variables), these left subtrees are very big, and the solution is found after having looked at almost all of the search tree. This behavior is likely to happen, because in N Queens solutions, typically every queen is placed not near to the queen of the previous column. With random value search, this behavior is broken because left subtree can correspond to final solutions. \\ \\
+    \item For a given value ordering, how does a dynamic variable ordering change the performance? \\ \\
+    For N Queens problem dynamic variable orderings are better than the static ones, this because during the search there are columns (variables) that become more likely to fail than the others, these are columns where the queen can be placed in few positions. With static ordering, the importance of these variables are not taken in account, so it can be made a mistake at some level of the search and can be wasted time in exploring a huge infeasible subtree. Instead, proceeding with dynamic order the columns that are more likely to fail are explored before, and the infeasible subtree can be skipped as soon as possible. \\ \\
+    \item Are there any heuristics that behave similarly? Explain the reason. \\ \\
+Yes, the min domain size ordering and the domWdeg ordering have pretty the same performance, because the weights are the same for all variables and since domWdeg ordering is the domain size ordering with weights then they behave in similar way, although domain size is pretty better in time because it doesn’t waste time in calculating the weights of constraint. The weights are equals because there are three constraint in the model and all the variables are involved in each of these constraints.
+
+    \end{enumerate}
+    \section{ Poster Placement }
+        \begin{tabular}{||c | c | c | c | c | c | c | c | c||} 
+    \hline
+      nxn & \multicolumn{4}{c|}{input order}  &  \multicolumn{4}{c||}{domWdeg} \\  \hline
+          & \multicolumn{2}{c|}{min value}  & \multicolumn{2}{c|}{random value}  & \multicolumn{2}{c|}{min value}  &  \multicolumn{2}{c||}{random value} \\  \hline
+          & unordered & ordered & unordered & ordered & unordered & ordered & unordered & ordered  \\  \hline
+    19x19 & 1,362,457 & \textbf{62} & 36,602,015 & - & 236,024 & 245,568 & 2,929,030 & 7,026,953 \\  \hline
+    20x20 & - & \textbf{323} & - & - & 1,873 & 1,731 & 5,797,456 & 3,743,786 \\  \hline
+    \end{tabular}
+
+    \begin{enumerate}
+    \item For a given variable ordering, how does random value choice change the performance? Explain the reason. \\ \\
+In poster placement the random value choice makes the performance worse, because if at every steps the rectagle is placed randomly in the free possible area then there are created different holes of free space that can’t be covered by any rectangle, and the progressive generation of these holes take the search to fail; and this means that the search tree is very huge. Instead, with min value choice the rectangle are added adjacently and this imply this not favor the creation of holes.\\
+    \item Which heuristic reveals the best performance? Explain the reason. \\ \\
+    The heuristic with the best performance is min value with input descending order. This because, the wide rectangles are the most problematic to place and placing them firstly are a good option, in order to have subtree search for the others' placement. This is a first fail approach: the wide rectangles are the most likely to fail so if we are in an infeasible subtree this is discovered as soon as possible, otherwise if we are in a deep subtree there is a good chance that it has the solution. \\ \\
+    \item Which heuristic is not affected much by the order of the rectangles? Explain the reason. \\ \\
+    The domWdeg heuristic with min value choice is not affected by the order of the rectangle because the order of the variables in the search is detected from the domain size of the variables and the weight of the constraints, so the initial order is always distorted.\\   
+    \end{enumerate}
+
+
+    \section{ Quasigroup Completion Problem }
+        \begin{tabular}{||c | c | c | c | c | c | c||} 
+        \hline
+            data & \multicolumn{2}{c|}{default search}  & \multicolumn{2}{c|}{domWdeg – random value}  &  \multicolumn{2}{c||}{domWdeg – random value + restarting} \\ \hline
+            &  fails & time & fails & time & fails & time \\  \hline
+            30-03 & - & - & 1,495,755 & 3m 25s & \textbf{1,090,634} & \textbf{2m 43s} \\ \hline
+            30-05 & 1,167,530 & 2m 41s & \textbf{7,163} & \textbf{1s 316msec} & 362,702 & 53s 496msec \\ \hline
+            30-08 & \textbf{1,250} & \textbf{380msec} & 4,398 & 849msec & 53,324 & 8s 75msec \\ \hline
+            30-12 & 230,082 & 29s 230msec & 47,036 & 7s 253msec & \textbf{13,104} & \textbf{2s 130msec} \\ \hline
+            30-19 &  \textbf{773,526} & \textbf{1m 49s} & - & - & 1,513,191 & 3m 52s \\ \hline
+
+            \end{tabular}
+
+    \begin{enumerate}
+    \item When does programming search do not improve the default search? \\ \\
+    The default search is not improved with \texttt{30-08.dzn} and \texttt{30-19.dzn} and in this two cases probably the solver have "luck" in initial choice and create immediately a feasible subtree that can be totally explored in time. But in some case, like in \texttt{30-03.dzn} the search is not so luck it times out. This is an aspect of heavy tail behavior where for some instance the solver is trapped in a exponentail subtree search. \\
+    \item When restarting the domWdeg – random value heuristic degrade the performance, what could be the reason? \\ \\
+    In \texttt{30-05.dzn} the heuristic performs better without a restart, probably in this situation the restart is "too quick": it presumes that the subtree is infeasible so it restarts the search, but it is better to be patient and leave the search to finish. On the contrary this is not the case for \texttt{30-03.dzn} and \texttt{30-12.dzn} where restart improve the search performance. \\ 
+    \item Which search approach is the best overall? Justify your answer. \\ \\
+     Probably the best approach is the domWdeg with random value and restart, which is the only search approach that in our experiment never timed out, although only in two case in a total of five provide a better search than the other two. So in a single experiment it is very hard to know a priori which approach will be the best but, as in this case, randomization and restart are good strategies against heavy tail behaviour because it allows to escape the search from a huge infeasible subtree, changing it to another random one. 
+    \end{enumerate}
+    
+\end{document}

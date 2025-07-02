@@ -1,0 +1,34 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[margin=3cm]{geometry}
+
+\title{Exercices of Decision Making with Constraint Programming\\  Exercise 4}
+\author{Andrea Alfonsi, Stefano Bucciarelli}
+
+
+\begin{document}
+    \maketitle
+    \section{RCPSP}
+        \begin{tabular}{||c | c | c | c ||}
+    \hline       
+        data & default search - obj & EST - obj & EST - time for first solution \\  \hline
+        Data 1 & 90 & 90  & 287msec \\ \hline
+        Data 2 & 53 & 54  & 293msec \\ \hline
+        Data 3 & 82 & 75  & 301msec \\ \hline    
+    \end{tabular}   
+    \section{JSP}
+    \begin{tabular}{||c | c | c | c ||}
+    \hline       
+        data & default search - obj & EST - obj & EST - time for first solution \\  \hline
+        Data 1 & 663 & 669 & 280msec \\  \hline
+        Data 2 & 826 & 921 & 295msec \\  \hline
+    \end{tabular}  
+    \section{Comments}
+    \begin{enumerate}
+        \item Is searching on EST a good strategy to find an initial solution? \\
+        Yes, for finding an initial solution EST works very well, in fact in our experiments the first solution is found in few hundreds of milliseconds. This happens because for the initial solution EST simply take the task/job that has the smaller start time from the possible values in the domain, and that is a greedy approach, so the first solution is a good solution found without so much difficulty.
+        \item Is searching on EST a good strategy to find an optimal solution? Justify your answer. \\
+        No, for finding an optimal solution EST does not work well, in fact in experiments EST have found the optimal solution within the 5 minutes only in few cases.
+        The initial solution found by EST is good, but the search for the optimal one is not good, since it involves going back to the root node and then trying to move the task that was first in the initial solution to the second position, and so on. But in an optimal solution, the task that was first in the initial solution could be in the middle positions, and with EST backtrack, it takes a long time to find it. 
+    \end{enumerate}
+\end{document}
